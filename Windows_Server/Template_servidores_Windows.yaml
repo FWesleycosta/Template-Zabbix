@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2022-04-07T11:08:52Z'
+  date: '2022-04-07T13:35:49Z'
   groups:
     -
       uuid: 002eb322ce784260bb7cd5a7161bf8a5
@@ -40,8 +40,8 @@ zabbix_export:
           uuid: f80f0d3641484937ad077e4b1523ab72
           name: 'Event viewer: Application'
           type: ZABBIX_ACTIVE
-          key: 'eventlog[Application]'
-          delay: 1h
+          key: 'eventlog[Application,,"Warning|Error"]'
+          delay: '300'
           history: 7d
           trends: '0'
           value_type: LOG
@@ -53,8 +53,8 @@ zabbix_export:
           uuid: fd0d60af2cee41fb919c0db817a1f88e
           name: 'Event viewer: Segurança'
           type: ZABBIX_ACTIVE
-          key: 'eventlog[Security]'
-          delay: 30m
+          key: 'eventlog[Security,,"Warning|Error"]'
+          delay: '300'
           history: 7d
           trends: '0'
           value_type: LOG
@@ -66,8 +66,8 @@ zabbix_export:
           uuid: 2707b59d703247d3ab3f22518b3f046c
           name: 'Event viewer: Sistema'
           type: ZABBIX_ACTIVE
-          key: 'eventlog[System,,,,,,]'
-          delay: 1h
+          key: 'eventlog[System,,"Warning|Error"]'
+          delay: '300'
           history: 7d
           trends: '0'
           value_type: LOG
