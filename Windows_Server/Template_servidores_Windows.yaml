@@ -1,0 +1,965 @@
+zabbix_export:
+  version: '6.0'
+  date: '2022-04-07T11:08:52Z'
+  groups:
+    -
+      uuid: 002eb322ce784260bb7cd5a7161bf8a5
+      name: Zabbix
+  templates:
+    -
+      uuid: 4bc5404358e54f35b37f467e14fab3bd
+      template: Template_servidores_Windows
+      name: Template_servidores_Windows
+      description: 'Template padrão para todos os servidores Windows'
+      groups:
+        -
+          name: Zabbix
+      items:
+        -
+          uuid: 55dab96c11324c16ab65814ad03738aa
+          name: 'Ping do agente Zabbix'
+          key: agent.ping
+          delay: 5s
+          history: 7d
+          trends: 180d
+          tags:
+            -
+              tag: Aplicação
+              value: 'Zabbix Agent'
+        -
+          uuid: e84c6817ac3243a784605d270aca8469
+          name: 'Quantidade de Atualizações Atribuídas ao Servidor'
+          key: Atualizacao.Servidor
+          delay: 1d
+        -
+          uuid: b30e2a1c3eed49fa99549ab5000514b1
+          name: Contagem_de_Dias_Desde_Ultima_Atualizacao
+          key: Contagem.Atualizacao
+          delay: 1d
+        -
+          uuid: f80f0d3641484937ad077e4b1523ab72
+          name: 'Event viewer: Application'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Application]'
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: Aplicação
+              value: Event_log
+        -
+          uuid: fd0d60af2cee41fb919c0db817a1f88e
+          name: 'Event viewer: Segurança'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[Security]'
+          delay: 30m
+          history: 7d
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: Aplicação
+              value: Event_log
+        -
+          uuid: 2707b59d703247d3ab3f22518b3f046c
+          name: 'Event viewer: Sistema'
+          type: ZABBIX_ACTIVE
+          key: 'eventlog[System,,,,,,]'
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: LOG
+          tags:
+            -
+              tag: Aplicação
+              value: Event_log
+        -
+          uuid: 386fd2c02e394fdf952db136756cbc9f
+          name: PING
+          type: SIMPLE
+          key: icmpping
+          delay: 5s
+          history: 7d
+          trends: 180d
+          units: B
+          tags:
+            -
+              tag: Aplicação
+              value: Protocolo_ICMP
+          triggers:
+            -
+              uuid: 1af34123a8e04b87ab810a50bc90b079
+              expression: 'last(/Template_servidores_Windows/icmpping,#2)=0'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/Template_servidores_Windows/icmpping,#5)=1'
+              name: '{HOST.NAME}, o protocolo ''PING'' está sem resposta'
+              priority: HIGH
+              manual_close: 'YES'
+        -
+          uuid: 17af2af446c54faab279ac21418d8cbd
+          name: 'Perda de pacote %'
+          type: SIMPLE
+          key: icmppingloss
+          delay: 60s
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Aplicação
+              value: Protocolo_ICMP
+          triggers:
+            -
+              uuid: 2f63e0cb4fd04d02a46fd4a561360678
+              expression: 'avg(/Template_servidores_Windows/icmppingloss,2)>35'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: last(/Template_servidores_Windows/icmppingloss)=0
+              name: '{HOST.NAME} , está com perda de pacote acima de 35%'
+              priority: AVERAGE
+              manual_close: 'YES'
+        -
+          uuid: d18d6181742c428fbb6f52d4d991f63c
+          name: 'Tempo de resposta'
+          type: SIMPLE
+          key: icmppingsec
+          delay: 60s
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: s
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Protocolo_ICMP
+          triggers:
+            -
+              uuid: 908b07da3fe5416c85d70fefe5b34af5
+              expression: last(/Template_servidores_Windows/icmppingsec)>30
+              name: '{HOST.NAME}, está com o tempo de resposta alto'
+              event_name: 'Response time is too high on {HOST.NAME}'
+              priority: AVERAGE
+              manual_close: 'YES'
+        -
+          uuid: 49701268a4b84e9fb453562f63d7a55f
+          name: 'Listar Atualização'
+          key: Listar.Atualizacao
+          delay: 1d
+          trends: '0'
+          value_type: LOG
+        -
+          uuid: 7c8c0090ad0440668b27c99079f65351
+          name: 'Usuário Conectado (Lista)'
+          key: Listar.usuario
+          delay: 5m
+          trends: '0'
+          value_type: LOG
+        -
+          uuid: e2eacb4a56e64cdaa9d10ce9e99054f0
+          name: 'IO Data Operations/sec'
+          key: 'perf_counter["\Process(_Total)\IO Data Operations/sec",300]'
+          delay: 30s
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: /sec
+          description: 'These counters count all I/O activity generated to include file, network and device I/Os. These analyses check when processes are doing more than 1,000 I/O’s per second and flag it as a warning. These analyses are best used in correlation with other analyses such as disk analysis to determine which processes might be involved in the I/O activity.'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Disco/Performance
+        -
+          uuid: 11dc82e6419f41aa8b0eaad463a3aa8a
+          name: 'IO Other Operations/sec'
+          key: 'perf_counter["\Process(_Total)\IO Other Operations/sec",300]'
+          delay: 30s
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: /sec
+          description: 'The number of input/output operations generated by a process that are neither reads nor writes, including file, network, and device I/Os. An example of this type of operation would be a control function. I/O Others directed to CONSOLE (console input object) handles are not counted.'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Disco/Performance
+        -
+          uuid: 4017b726555140968cbb2f331eb5703e
+          name: 'IO Read Operations/sec'
+          key: 'perf_counter["\Process(_Total)\IO Read Operations/sec",300]'
+          delay: 5m
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: /sec
+          description: 'The number of read input/output operations generated by a process, including file, network, and device I/Os. I/O Reads directed to CONSOLE (console input object) handles are not counted.'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Disco/Performance
+        -
+          uuid: 7ba09a2ff82840eea7b4c9afabd0b9e0
+          name: 'IO Write Operations/sec'
+          key: 'perf_counter["\Process(_Total)\IO Write Operations/sec",300]'
+          delay: 5m
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: /sec
+          description: 'The number of write input/output operations generated by a process, including file, network, and device I/Os. I/O Writes directed to CONSOLE (console input object) handles are not counted.'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Disco/Performance
+        -
+          uuid: 240f3c53dc964e7494673b812a1ceff8
+          name: 'Number of threads'
+          key: 'perf_counter[\2\250]'
+          delay: 5m
+          history: 7d
+          trends: 180d
+          description: 'O número de threads usados ​​por todos os processos em execução.'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Performance
+        -
+          uuid: 54133e5891844bc596872fed4a15e142
+          name: 'Consumo de CPU em %'
+          key: 'perf_counter[\Processor(_Total)\% Processor Time]'
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: CPU
+          triggers:
+            -
+              uuid: 460b2b5beb184577ad3ede6be667dee1
+              expression: 'avg(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],25m)>=87 or  min(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],30m)>=85'
+              name: 'Consumo de CPU no {HOST.NAME}, está acima de 87 %'
+              priority: AVERAGE
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'Consumo de CPU no {HOST.NAME}, está acima de 90 %'
+                  expression: |
+                    avg(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],40m)>=90 or 
+                    min(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],50m)>=87 and avg(/Template_servidores_Windows/icmppingloss,5m)>=5
+        -
+          uuid: 3e1026a816ef474d882bf8b9832644f5
+          name: 'Número de processos rodando'
+          key: 'proc.num[]'
+          delay: 120s
+          history: 7d
+          trends: 180d
+          tags:
+            -
+              tag: Aplicação
+              value: Performance
+        -
+          uuid: 96c07c04fa0644999436a8b6c7a6cd98
+          name: 'Carga do processador (média de 1 minuto por núcleo)'
+          key: 'system.cpu.load[percpu,avg1]'
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Performance
+        -
+          uuid: f379b818f78f4d028866c52f6c041840
+          name: 'Carga do processador (média de 5 minutos por núcleo)'
+          key: 'system.cpu.load[percpu,avg5]'
+          delay: 5m
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Performance
+        -
+          uuid: 6acd5694dc6c46df9ff76eb762c9eea1
+          name: 'Carga do processador (média de 15 minutos por núcleo)'
+          key: 'system.cpu.load[percpu,avg15]'
+          delay: 15m
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Performance
+        -
+          uuid: 88a5b3504ee4414e9d76ad6f6f1001af
+          name: Hostname
+          key: system.hostname
+          delay: 1d
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: NAME
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 1d
+          tags:
+            -
+              tag: Aplicação
+              value: 'Sistema Operacional'
+        -
+          uuid: 4a3b06db0e824b9d875b64903ae6377f
+          name: 'Horário local do servidor'
+          key: system.localtime
+          delay: 5h
+          history: 7d
+          trends: 180d
+          units: unixtime
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: 'Sistema Operacional'
+        -
+          uuid: 93e70e07497a4a209848d14ba7ba82e3
+          name: 'Sistema operacional'
+          key: system.sw.arch
+          delay: 1d
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: HW_ARCH
+          tags:
+            -
+              tag: Aplicação
+              value: 'Sistema Operacional'
+        -
+          uuid: 8e763b2aee2d4b46bf81a3228f15df9c
+          name: 'Informação do sistema'
+          key: system.uname
+          delay: '3600'
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          inventory_link: OS
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: 'Sistema Operacional'
+        -
+          uuid: aac8d093518f4c6fb446f84ef0c0db9d
+          name: 'Tempo disponível'
+          key: system.uptime
+          delay: 10s
+          history: 7d
+          trends: 180d
+          units: uptime
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: 'Sistema Operacional'
+          triggers:
+            -
+              uuid: a4a548fd7fb542a7bc73c0f0179581ad
+              expression: change(/Template_servidores_Windows/system.uptime)<0
+              name: '{HOST.NAME} foi reiniciado'
+              priority: DISASTER
+              manual_close: 'YES'
+        -
+          uuid: 24712613017948d6b02aa1e046deda67
+          name: 'Memória em uso %'
+          key: 'vm.memory.size[pused]'
+          history: 7d
+          trends: 180d
+          value_type: FLOAT
+          units: '%'
+          tags:
+            -
+              tag: Aplicação
+              value: Memória
+          triggers:
+            -
+              uuid: 9523ea45f4684a1b96a1d14374036ea0
+              expression: |
+                min(/Template_servidores_Windows/vm.memory.size[pused],30m)>=87 or 
+                avg(/Template_servidores_Windows/vm.memory.size[pused],50m)>=90
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'min(/Template_servidores_Windows/vm.memory.size[pused],10m)<87 or avg(/Template_servidores_Windows/vm.memory.size[pused],10m)<90'
+              name: 'Consumo de Memória no {HOST.NAME}, está acima de 87%'
+              priority: AVERAGE
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'Consumo de Memória no {HOST.NAME}, está acima de 95%'
+                  expression: 'avg(/Template_servidores_Windows/vm.memory.size[pused],50m)>=95 or min(/Template_servidores_Windows/vm.memory.size[pused],55m)>=92 and avg(/Template_servidores_Windows/icmppingloss,5m)>=5'
+                  recovery_expression: 'avg(/Template_servidores_Windows/vm.memory.size[pused],10m)<95 or min(/Template_servidores_Windows/vm.memory.size[pused],15m)<92'
+            -
+              uuid: 44be2a0ab61a4e4594acd26dd6370744
+              expression: |
+                avg(/Template_servidores_Windows/vm.memory.size[pused],25m)>=99 or
+                min(/Template_servidores_Windows/vm.memory.size[pused],30m)>=98
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'avg(/Template_servidores_Windows/vm.memory.size[pused],15m)<99 or min(/Template_servidores_Windows/vm.memory.size[pused],15m)<98'
+              name: 'Consumo de Memória no {HOST.NAME}, está em 99%'
+              priority: DISASTER
+              manual_close: 'YES'
+        -
+          uuid: 5ae2b458952d4f8ba6d40ce72d4cee08
+          name: 'Memória total'
+          key: 'vm.memory.size[total]'
+          delay: '3600'
+          history: 7d
+          trends: 180d
+          units: B
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED
+              parameters:
+                - ''
+          tags:
+            -
+              tag: Aplicação
+              value: Memória
+        -
+          uuid: 3d14fd9f633d43ddb1bcfdf015a0d0b5
+          name: 'Número de núcleos'
+          key: 'wmi.get[root/cimv2,"Select NumberOfLogicalProcessors from Win32_ComputerSystem"]'
+          delay: 1d
+          history: 7d
+          trends: 180d
+          tags:
+            -
+              tag: Aplicação
+              value: 'Sistema Operacional'
+        -
+          uuid: 31b7d93a3d3545d3844e5c0bf13ebee5
+          name: 'Disponibilidade {Zabbix & Server}'
+          type: INTERNAL
+          key: 'zabbix[host,agent,available]'
+          delay: 5m
+          history: 7d
+          trends: 180d
+          tags:
+            -
+              tag: Aplicação
+              value: 'Zabbix Agent'
+          triggers:
+            -
+              uuid: 3ee5738c012f48cea2455ed316c33fde
+              expression: 'last(/Template_servidores_Windows/zabbix[host,agent,available])<>1'
+              name: 'Perda de comunicação entre o {HOST.NAME} e o Zabbix Agent'
+              event_name: 'Zabbix agent no  {HOST.NAME} está parado por mais de 5 minutes'
+              priority: DISASTER
+              manual_close: 'YES'
+      discovery_rules:
+        -
+          uuid: a0e17d756cc24b16852a15fbc9285a6e
+          name: 'Descoberta de rede'
+          key: net.if.discovery
+          delay: '3600'
+          filter:
+            conditions:
+              -
+                macro: '{#IFNAME}'
+                value: '@Network interfaces for discovery'
+                formulaid: A
+          item_prototypes:
+            -
+              uuid: f93034776e094c30a764dfb78d090b88
+              name: '{#IFNAME} - Tráfego de entrada'
+              key: 'net.if.in[{#IFNAME}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: Aplicação
+                  value: Interface/Rede
+            -
+              uuid: 4dd918843c104052a19da1defdd5ee12
+              name: '{#IFNAME} - Tráfego de saida'
+              key: 'net.if.out[{#IFNAME}]'
+              delay: 3m
+              history: 7d
+              trends: 180d
+              units: bps
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '8'
+              tags:
+                -
+                  tag: Aplicação
+                  value: Interface/Rede
+          graph_prototypes:
+            -
+              uuid: 08e9ca51134b4f62a1119e24f1adc629
+              name: '{#IFNAME} - Consumo de rede'
+              graph_items:
+                -
+                  color: 199C0D
+                  item:
+                    host: Template_servidores_Windows
+                    key: 'net.if.in[{#IFNAME}]'
+                -
+                  sortorder: '1'
+                  color: FF0000
+                  item:
+                    host: Template_servidores_Windows
+                    key: 'net.if.out[{#IFNAME}]'
+        -
+          uuid: 2fe2348d64ac4a36b12a4fcc575fd8d4
+          name: 'Descoberta de unidade de disco'
+          key: vfs.fs.discovery
+          delay: '3600'
+          filter:
+            conditions:
+              -
+                macro: '{#FSTYPE}'
+                value: '@File systems for discovery'
+                formulaid: A
+          item_prototypes:
+            -
+              uuid: d3c640c2b5ce4d989f02ec29d2329674
+              name: '{#FSNAME} - Espaço livre'
+              key: 'vfs.fs.size[{#FSNAME},free]'
+              delay: 1h
+              history: 7d
+              trends: 180d
+              units: B
+              tags:
+                -
+                  tag: Aplicação
+                  value: Disco
+            -
+              uuid: 1dfdcf99d39445bf8f98d3578b035744
+              name: '{#FSNAME} - Espaço livre em (porcentagem)'
+              key: 'vfs.fs.size[{#FSNAME},pfree]'
+              delay: 1h
+              history: 7d
+              trends: 180d
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Aplicação
+                  value: Disco
+              trigger_prototypes:
+                -
+                  uuid: 3e2c998731df496e9b41312fb09d3b4a
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<5'
+                  name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 5% no disco {#FSNAME}'
+                  event_name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 5% no disco {#FSNAME}'
+                  priority: DISASTER
+                  manual_close: 'YES'
+                  dependencies:
+                    -
+                      name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 10% no disco {#FSNAME}'
+                      expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<10'
+                -
+                  uuid: fdf098dc52424185b03809bf984b9be5
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<10'
+                  name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 10% no disco {#FSNAME}'
+                  event_name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 10% no disco {#FSNAME}'
+                  priority: HIGH
+                  manual_close: 'YES'
+                  dependencies:
+                    -
+                      name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 15% no disco {#FSNAME}'
+                      expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<15'
+                -
+                  uuid: 1c59a7959d324079a01a1adaaf3012f4
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<15'
+                  name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 15% no disco {#FSNAME}'
+                  event_name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 15% no disco {#FSNAME}'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                  dependencies:
+                    -
+                      name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 25% no disco {#FSNAME}'
+                      expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<25'
+                -
+                  uuid: 8108072f238441c9b291dee4ea43a76d
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pfree])<25'
+                  name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 25% no disco {#FSNAME}'
+                  event_name: '{O espaço livre no disco no {HOST.NAME}}, está menor que 25% no disco {#FSNAME}'
+                  priority: WARNING
+                  manual_close: 'YES'
+            -
+              uuid: e039e554443c4c41af3621a98b5316d4
+              name: '{#FSNAME} - Espaço usado em (porcentagem)'
+              key: 'vfs.fs.size[{#FSNAME},pused]'
+              delay: 4m
+              history: 7d
+              trends: 180d
+              value_type: FLOAT
+              units: '%'
+              tags:
+                -
+                  tag: Aplicação
+                  value: Disco
+              trigger_prototypes:
+                -
+                  uuid: 75dffb3565bc4b188bb2a5fb6fc3c90d
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pused])>80'
+                  name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 80% no disco {#FSNAME}'
+                  event_name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 80% no disco {#FSNAME}'
+                  priority: AVERAGE
+                  manual_close: 'YES'
+                  dependencies:
+                    -
+                      name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 92% no disco {#FSNAME}'
+                      expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pused])>92'
+                -
+                  uuid: 2cd2f517492844cf9d3819840c677411
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pused])>92'
+                  name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 92% no disco {#FSNAME}'
+                  event_name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 92% no disco {#FSNAME}'
+                  priority: HIGH
+                  manual_close: 'YES'
+                  dependencies:
+                    -
+                      name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 95% no disco {#FSNAME}'
+                      expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pused])>95'
+                -
+                  uuid: 6401d9fb27a541b5bb6944245ef09d53
+                  expression: 'last(/Template_servidores_Windows/vfs.fs.size[{#FSNAME},pused])>95'
+                  name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 95% no disco {#FSNAME}'
+                  event_name: '{O espaço usado no disco no {HOST.NAME}}, está acima de 95% no disco {#FSNAME}'
+                  priority: DISASTER
+                  manual_close: 'YES'
+            -
+              uuid: e48648c17ebe46c29a2a1ccb0d00a26e
+              name: '{#FSNAME} - Espaço total'
+              key: 'vfs.fs.size[{#FSNAME},total]'
+              delay: 1d
+              history: 7d
+              trends: 180d
+              units: B
+              tags:
+                -
+                  tag: Aplicação
+                  value: Disco
+            -
+              uuid: a1fab995e3db406da1356e57bf46e6d6
+              name: '{#FSNAME}: - Espaço usado'
+              key: 'vfs.fs.size[{#FSNAME},used]'
+              delay: 1h
+              units: B
+              tags:
+                -
+                  tag: Aplicação
+                  value: Disco
+          graph_prototypes:
+            -
+              uuid: b9d49eba5f2e439289bdd147f2ad214b
+              name: '{#FSNAME}  - Consumo de disco'
+              graph_items:
+                -
+                  sortorder: '1'
+                  color: 00FF00
+                  item:
+                    host: Template_servidores_Windows
+                    key: 'vfs.fs.size[{#FSNAME},pused]'
+            -
+              uuid: b077e1f3fab943919aa6a8e9fe0fecb4
+              name: '{#FSNAME}  - Espaço livre'
+              graph_items:
+                -
+                  sortorder: '1'
+                  color: 199C0D
+                  item:
+                    host: Template_servidores_Windows
+                    key: 'vfs.fs.size[{#FSNAME},pfree]'
+      dashboards:
+        -
+          uuid: 0887c7892f0846468a17d10c6e06083c
+          name: 'Servidores Windows'
+          pages:
+            -
+              widgets:
+                -
+                  type: CLOCK
+                  x: '19'
+                  width: '5'
+                  height: '5'
+                -
+                  type: GRAPH_CLASSIC
+                  name: 'Consumo de CPU'
+                  width: '19'
+                  height: '5'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: 'Consumo de CPU'
+                        host: Template_servidores_Windows
+                -
+                  type: GRAPH_PROTOTYPE
+                  name: 'Consumo de Disco'
+                  'y': '15'
+                  width: '24'
+                  height: '5'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: columns
+                      value: '1'
+                    -
+                      type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        name: '{#FSNAME}  - Consumo de disco'
+                        host: Template_servidores_Windows
+                -
+                  type: GRAPH_CLASSIC
+                  name: 'Consumo de memória'
+                  'y': '5'
+                  width: '24'
+                  height: '5'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: source_type
+                      value: '1'
+                    -
+                      type: ITEM
+                      name: itemid
+                      value:
+                        key: 'vm.memory.size[pused]'
+                        host: Template_servidores_Windows
+                -
+                  type: GRAPH_PROTOTYPE
+                  name: 'Consumo de rede'
+                  'y': '20'
+                  width: '24'
+                  height: '5'
+                  fields:
+                    -
+                      type: INTEGER
+                      name: columns
+                      value: '1'
+                    -
+                      type: GRAPH_PROTOTYPE
+                      name: graphid
+                      value:
+                        name: '{#IFNAME} - Consumo de rede'
+                        host: Template_servidores_Windows
+                -
+                  type: GRAPH_CLASSIC
+                  name: 'Perda de pacote %'
+                  x: '12'
+                  'y': '10'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: 'Perda de pacote %'
+                        host: Template_servidores_Windows
+                -
+                  type: GRAPH_CLASSIC
+                  name: 'Tempo resposta'
+                  'y': '10'
+                  width: '12'
+                  height: '5'
+                  fields:
+                    -
+                      type: GRAPH
+                      name: graphid
+                      value:
+                        name: 'Tempo de resposta'
+                        host: Template_servidores_Windows
+  triggers:
+    -
+      uuid: ecc8555ccd09403fafc3889c59a1aa01
+      expression: |
+        avg(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],40m)>=90 or 
+        min(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],50m)>=87 and avg(/Template_servidores_Windows/icmppingloss,5m)>=5
+      name: 'Consumo de CPU no {HOST.NAME}, está acima de 90 %'
+      priority: HIGH
+      description: 'Trigger só irá alarmar se o uso de cpu causar perda de pacotes na comunicação com o servidor.'
+      manual_close: 'YES'
+      dependencies:
+        -
+          name: 'Consumo de CPU no {HOST.NAME}, está em 100%'
+          expression: |
+            avg(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],25m)>=99 or
+             min(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],25m)>=97 and avg(/Template_servidores_Windows/icmppingloss,5m)>=30
+    -
+      uuid: 18a3bcf4a3184fbbbe5dcc7ed9f8c741
+      expression: |
+        avg(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],25m)>=99 or
+         min(/Template_servidores_Windows/perf_counter[\Processor(_Total)\% Processor Time],25m)>=97 and avg(/Template_servidores_Windows/icmppingloss,5m)>=30
+      name: 'Consumo de CPU no {HOST.NAME}, está em 100%'
+      priority: DISASTER
+      manual_close: 'YES'
+    -
+      uuid: e247ab552c6f4ee9a1dda815c0282ad6
+      expression: 'avg(/Template_servidores_Windows/vm.memory.size[pused],50m)>=95 or min(/Template_servidores_Windows/vm.memory.size[pused],55m)>=92 and avg(/Template_servidores_Windows/icmppingloss,5m)>=5'
+      recovery_mode: RECOVERY_EXPRESSION
+      recovery_expression: 'avg(/Template_servidores_Windows/vm.memory.size[pused],10m)<95 or min(/Template_servidores_Windows/vm.memory.size[pused],15m)<92'
+      name: 'Consumo de Memória no {HOST.NAME}, está acima de 95%'
+      priority: HIGH
+      description: 'Trigger só irá alarmar se o uso de memória causar perda de pacotes na comunicação com o servidor.'
+      manual_close: 'YES'
+      dependencies:
+        -
+          name: 'Consumo de Memória no {HOST.NAME}, está em 99%'
+          expression: |
+            avg(/Template_servidores_Windows/vm.memory.size[pused],25m)>=99 or
+            min(/Template_servidores_Windows/vm.memory.size[pused],30m)>=98
+          recovery_expression: 'avg(/Template_servidores_Windows/vm.memory.size[pused],15m)<99 or min(/Template_servidores_Windows/vm.memory.size[pused],15m)<98'
+  graphs:
+    -
+      uuid: ce36a7acbefd4d25ac38363bac28323c
+      name: 'Consumo de CPU'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 199C0D
+          item:
+            host: Template_servidores_Windows
+            key: 'perf_counter[\Processor(_Total)\% Processor Time]'
+    -
+      uuid: ece4a31c6e844e138d43869e2452169d
+      name: 'Consumo de memória'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 199C0D
+          item:
+            host: Template_servidores_Windows
+            key: 'vm.memory.size[pused]'
+    -
+      uuid: 7a006423caa54df5a7f7334ba0424f9c
+      name: 'Média de Carga do processador'
+      show_work_period: 'NO'
+      show_triggers: 'NO'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 00FF00
+          item:
+            host: Template_servidores_Windows
+            key: 'system.cpu.load[percpu,avg1]'
+        -
+          sortorder: '2'
+          color: FFFF00
+          item:
+            host: Template_servidores_Windows
+            key: 'system.cpu.load[percpu,avg5]'
+        -
+          sortorder: '3'
+          color: FF0000
+          item:
+            host: Template_servidores_Windows
+            key: 'system.cpu.load[percpu,avg15]'
+    -
+      uuid: 48f248cdec4b431caf3bcc3156502f28
+      name: 'Perda de pacote %'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 199C0D
+          item:
+            host: Template_servidores_Windows
+            key: icmppingloss
+    -
+      uuid: 2ebae968329d415f94ad31f56264b20a
+      name: 'Tempo de resposta'
+      graph_items:
+        -
+          sortorder: '1'
+          color: 199C0D
+          item:
+            host: Template_servidores_Windows
+            key: icmppingsec
