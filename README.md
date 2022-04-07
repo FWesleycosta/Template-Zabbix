@@ -4,8 +4,10 @@
 
 ***
 O intuito desse repositório é salvar os templates que utilizo na ferramenta de monitoramento Zabbix.
+
 No repositório vai conter template de servidores (Windows e Linux), equipamentos de rede (Switch, Firewall, Aruba) e equipamentos de telefonia. 
 ***
+
 
 > OBSERVAÇÂO
 
